@@ -1,0 +1,420 @@
+/* ============================================================
+   Bit Manipulation Interactive Tutorial — Unified Stylesheet
+   All demos and chapter pages share this file.
+   ============================================================ */
+
+/* ── CSS variables (light mode) ── */
+:root {
+  --surface-1: #ffffff;
+  --surface-2: #f5f5f3;
+  --surface-3: #eeede8;
+  --border: rgba(0,0,0,0.15);
+  --text-primary: #1a1a18;
+  --text-muted: #6b6b67;
+  --blue-bg:    #E6F1FB; --blue-text:   #185FA5; --blue-border: #378ADD;
+  --green-bg:   #E1F5EE; --green-text:  #0F6E56;
+  --red-bg:     #FCEBEB; --red-text:    #A32D2D;
+  --amber-bg:   #FAEEDA; --amber-text:  #854F0B;
+  --purple-bg:  #EEEDFE; --purple-text: #533AB7;
+}
+
+/* ── CSS variables (dark mode — system preference) ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-1: #1e1e1c; --surface-2: #252523; --surface-3: #2e2e2b;
+    --border: rgba(255,255,255,0.12);
+    --text-primary: #e8e6de; --text-muted: #9c9a92;
+    --blue-bg:    #042C53; --blue-text:   #B5D4F4; --blue-border: #185FA5;
+    --green-bg:   #04342C; --green-text:  #9FE1CB;
+    --red-bg:     #501313; --red-text:    #F7C1C1;
+    --amber-bg:   #412402; --amber-text:  #FAC775;
+    --purple-bg:  #26215C; --purple-text: #CECBF6;
+  }
+}
+
+/* ── CSS variables (dark mode — manual override) ── */
+[data-theme="dark"] {
+  --surface-1: #1e1e1c; --surface-2: #252523; --surface-3: #2e2e2b;
+  --border: rgba(255,255,255,0.12);
+  --text-primary: #e8e6de; --text-muted: #9c9a92;
+  --blue-bg:    #042C53; --blue-text:   #B5D4F4; --blue-border: #185FA5;
+  --green-bg:   #04342C; --green-text:  #9FE1CB;
+  --red-bg:     #501313; --red-text:    #F7C1C1;
+  --amber-bg:   #412402; --amber-text:  #FAC775;
+  --purple-bg:  #26215C; --purple-text: #CECBF6;
+}
+
+/* ── Reset / base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  padding: 2rem 1rem;
+  line-height: 1.6;
+}
+
+/* ── Navigation bar ── */
+.navbar {
+  max-width: 680px;
+  margin: 0 auto 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.navbar-brand {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.navbar-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.navbar-nav a {
+  font-size: 0.875rem;
+  color: var(--blue-text);
+  text-decoration: none;
+}
+.navbar-nav a:hover { text-decoration: underline; }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 0.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+  padding: 0;
+}
+.theme-toggle:hover {
+  background: var(--blue-bg);
+  border-color: var(--blue-border);
+  color: var(--blue-text);
+}
+
+/* ── Page chrome ── */
+.page-header {
+  max-width: 680px;
+  margin: 0 auto 2rem;
+}
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.page-header p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.chapter-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue-text);
+  background: var(--blue-bg);
+  border-radius: 5px;
+  padding: 2px 8px;
+  margin-bottom: 0.6rem;
+}
+
+/* ── Prose ── */
+.prose {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.prose p {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+.prose code {
+  font-family: monospace;
+  font-size: 0.88em;
+  background: var(--surface-3);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* ── Demo box ── */
+.demo-box {
+  background: var(--surface-2);
+  border-radius: 12px;
+  border: 0.5px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+.demo-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+/* ── Formula bar ── */
+.formula-bar {
+  font-family: monospace;
+  font-size: 13px;
+  background: var(--surface-1);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* ── Bit rows ── */
+.bit-row {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.bit-index-row {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.bit-index {
+  width: 30px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* ── Bit boxes ── */
+.bit {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.13s, color 0.13s;
+  user-select: none;
+}
+.bit.clickable { cursor: pointer; }
+.bit.b-1     { background: #185FA5; color: #E6F1FB; }
+.bit.b-0     { background: var(--surface-3); color: var(--text-muted); }
+.bit.b-sign  { background: #A32D2D; color: #FCEBEB; }
+.bit.b-exp   { background: #533AB7; color: #EEEDFE; }
+.bit.b-mant  { background: #0F6E56; color: #E1F5EE; }
+.bit.b-pass  { background: #0F6E56; color: #E1F5EE; }
+.bit.b-block { background: var(--surface-3); color: var(--text-muted); opacity: 0.4; }
+.bit.b-set   { background: #533AB7; color: #EEEDFE; }
+.bit.b-clear { background: #A32D2D; color: #FCEBEB; }
+.bit.b-flip  { background: #9F3BAA; color: #F4C0D1; }
+.bit.b-target{ background: #854F0B; color: #FAEEDA; }
+.bit.b-mask-1{ background: #3B6D11; color: #EAF3DE; }
+.bit.b-mask-0{ background: #633806; color: #FAEEDA; }
+
+/* ── Tabs ── */
+.tab-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 0.5px solid var(--border);
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.tab.active {
+  border-color: var(--blue-border);
+  background: var(--blue-bg);
+  color: var(--blue-text);
+}
+
+/* ── Place value labels ── */
+.place-row, .contrib-row {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.place-cell, .contrib-cell {
+  width: 30px;
+  text-align: center;
+  font-family: monospace;
+  line-height: 1.2;
+}
+.place-cell {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+.place-cell .power  { display: block; }
+.place-cell .pvalue { display: block; font-size: 10px; color: var(--blue-text); font-weight: 600; }
+.contrib-cell {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--blue-text);
+  height: 16px;
+  margin-top: 3px;
+}
+.contrib-cell.zero { color: transparent; }
+
+/* ── Result box ── */
+.result-box {
+  border-top: 0.5px solid var(--border);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.result-value {
+  font-size: 28px;
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--blue-text);
+}
+.result-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 6px;
+  font-family: monospace;
+}
+.result-explain {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-top: 6px;
+}
+.result-explain .term-active {
+  color: var(--blue-text);
+  font-family: monospace;
+  font-weight: 500;
+}
+
+/* ── Presets ── */
+.preset-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+.preset-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+.preset-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 0.5px solid var(--border);
+  font-size: 12px;
+  font-family: monospace;
+  cursor: pointer;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  transition: background 0.1s, border-color 0.1s;
+}
+.preset-btn:hover {
+  background: var(--blue-bg);
+  color: var(--blue-text);
+  border-color: var(--blue-border);
+}
+
+/* ── Analogy panel ── */
+.analogy-panel {
+  background: var(--surface-1);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.analogy-panel strong { color: var(--text-primary); }
+.analogy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.analogy-col {
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.analogy-col .col-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-family: sans-serif;
+}
+
+/* ── Chapter list (index.html) ── */
+.chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 1.5rem 0;
+}
+.chapter-card {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: border-color 0.1s, background 0.1s;
+}
+.chapter-card:hover {
+  border-color: var(--blue-border);
+  background: var(--blue-bg);
+}
+.chapter-card-num {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue-text);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+.chapter-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.chapter-card-desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .bit, .bit-index, .place-cell, .contrib-cell { width: 24px; }
+  .bit { height: 24px; font-size: 11px; }
+}

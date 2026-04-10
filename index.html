@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bit Manipulation — Interactive Tutorial</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Apply saved theme before paint to avoid flash
+    const t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  </script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="navbar-brand" href="index.html">Bit Manipulation</a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+      <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+  </nav>
+
+  <div class="prose">
+    <div class="page-header">
+      <h1>Bit Manipulation</h1>
+      <p>An interactive tutorial from place values to floating point.</p>
+    </div>
+
+    <p>
+      This tutorial teaches binary representation, bitwise operators, and
+      common bit-manipulation patterns — from first principles to real-world
+      applications including IEEE 754 floating-point formats used in machine
+      learning.
+    </p>
+    <p>
+      Every concept has a hands-on demo. Toggle bits, adjust values, and
+      watch the results update live. No prior knowledge of binary arithmetic
+      or hardware is assumed.
+    </p>
+
+    <div class="chapter-list">
+
+      <a class="chapter-card" href="chapters/01-place-values.html">
+        <span class="chapter-card-num">Chapter 1</span>
+        <span class="chapter-card-title">Binary Place Values</span>
+        <span class="chapter-card-desc">How bits combine to represent any whole number.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/02-signed-integers.html">
+        <span class="chapter-card-num">Chapter 2</span>
+        <span class="chapter-card-title">Signed Integers</span>
+        <span class="chapter-card-desc">Two's complement and the origin of negative numbers in binary.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/03-operators.html">
+        <span class="chapter-card-num">Chapter 3</span>
+        <span class="chapter-card-title">Bitwise Operators</span>
+        <span class="chapter-card-desc">AND, OR, XOR, NOT, and shifts applied bit-by-bit.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/04-shifts.html">
+        <span class="chapter-card-num">Chapter 4</span>
+        <span class="chapter-card-title">Bit Shifts</span>
+        <span class="chapter-card-desc">Logical and arithmetic shifts as multiplication by powers of two.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/05-bit-tasks.html">
+        <span class="chapter-card-num">Chapter 5</span>
+        <span class="chapter-card-title">Bit Tasks</span>
+        <span class="chapter-card-desc">Get, set, clear, toggle, and update individual bits.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/06-masks.html">
+        <span class="chapter-card-num">Chapter 6</span>
+        <span class="chapter-card-title">Masks</span>
+        <span class="chapter-card-desc">Building and applying single-bit and range masks.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/07-packing-unpacking.html">
+        <span class="chapter-card-num">Chapter 7</span>
+        <span class="chapter-card-title">Packing and Unpacking</span>
+        <span class="chapter-card-desc">Storing multiple values in one integer using bit fields.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/08-applications.html">
+        <span class="chapter-card-num">Chapter 8</span>
+        <span class="chapter-card-title">Applications</span>
+        <span class="chapter-card-desc">Permissions, log₂, and other real-world bit patterns.</span>
+      </a>
+
+      <a class="chapter-card" href="chapters/09-floating-point.html">
+        <span class="chapter-card-num">Chapter 9</span>
+        <span class="chapter-card-title">Floating Point</span>
+        <span class="chapter-card-desc">IEEE 754 from sign bit to NaN, covering fp32, fp16, and bf16.</span>
+      </a>
+
+    </div>
+  </div>
+
+  <script>
+    const MOON = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    const SUN  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function isDark() {
+      const t = document.documentElement.dataset.theme;
+      if (t === 'dark') return true;
+      if (t === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function updateIcon() {
+      document.getElementById('theme-icon').innerHTML = isDark() ? MOON : SUN;
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      updateIcon();
+    });
+
+    updateIcon();
+  </script>
+
+</body>
+</html>
