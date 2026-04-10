@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Place Values — Bit Manipulation</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    const t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  </script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="02-signed-integers.html">Signed Integers &rarr;</a>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+        <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="prose">
+
+    <div class="page-header">
+      <span class="chapter-label">Chapter 1</span>
+      <h1>Binary Place Values</h1>
+    </div>
+
+    <div class="chapter-goals">
+      <span class="chapter-goals-label">Focus</span>
+      By the end of this chapter you should be able to look at an 8-bit pattern
+      and mentally compute its value as a sum of powers of 2; and conversely,
+      decompose a number like 42 into its binary representation. Everything else
+      in bit manipulation builds on this one skill.
+    </div>
+
+    <p>
+      If we work with a high-level language like Python or JavaScript, or if we're
+      generic computer users, we don't really think much about binary numbers or
+      binary operations. But if we wish to understand how computers work at a lower level,
+      getting a good intuition for binary representations is essential.
+      The goal of this chapter is to build that mental model.
+    </p>
+
+    <p>
+      Let's start with something simple and familiar, the number <strong>365</strong>.
+      This number can be decomposed into three components. The hundreds, the tens, and the ones.
+      So we have 300, 60, and 5, which all add up to 365!
+      This is what makes this number a <strong>decimal number</strong>, or a <strong>Base 10</strong> number.
+      We have ten possible values (the numbers 0 to 9); and once we use all of them, we add a new <i>column</i>
+      to the right.
+      Each of these new columns represents a power of 10, which are things like 1, 10, 100, 1000...
+      So the number 365 is actually described as <i>a sum over powers of 10</i>: <code>365 = 3·100 + 6·10 + 5·1</code>
+      The total value is just the sum of each
+      digit multiplied by its column's weight.
+    </p>
+
+    <p>
+      Binary numbers are exactly the same thing.
+      The only differences are that a) columns multiply
+      by <strong>2</strong> instead of 10;
+      and b) each digit can only have two possible values: a <code>0</code> or <code>1</code>.
+      This is why we call these <strong>Base 2</strong> numbers
+      In base 2 numbers, each digit is called a <em>bit</em>.
+      We can think of each bit as an independent on/off switch for its column's value.
+      An 8-bit number has exactly eight of these switches, controlling columns that are powers of two: 128, 64,
+      32, 16, 8, 4, 2, and 1 from left to right.
+    </p>
+
+    <p>
+      In an 8-bit number representation, the value of the number is the sum of every column where the switch
+      is on. Let's say we have 8 bits, where bit 0 is <code>b<sub>0</sub></code>:
+    </p>
+
+    <p>
+      <code>value = b<sub>7</sub>&middot;128 + b<sub>6</sub>&middot;64 + b<sub>5</sub>&middot;32 + b<sub>4</sub>&middot;16 + b<sub>3</sub>&middot;8 + b<sub>2</sub>&middot;4 + b<sub>1</sub>&middot;2 + b<sub>0</sub>&middot;1</code>
+    </p>
+
+    <p>
+      With <em>n</em> bits we can represent 2<sup><em>n</em></sup> unique
+      values — from 0 (all switches off) to 2<sup><em>n</em></sup>&minus;1 (all
+      switches on). With 8 bits, we can cover numbers from 0 to 255.
+    </p>
+
+    <p>
+      Notice that each bit is completely independent.
+      Flipping bit <em>k</em> changes the total by exactly 2<sup><em>k</em></sup> and nothing
+      else shifts. This independence is what makes a lot of the bit tricks work.
+      These will be covered in later chapters.
+      In the interactive demo below, toggle the switches and pay attention to each column's contribution.
+    </p>
+
+    <!-- ── Demo 1.1 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 1.1 &mdash; Binary Place Value Explorer</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch1SetVal(0)">0</button>
+        <button class="preset-btn" onclick="ch1SetVal(1)">1</button>
+        <button class="preset-btn" onclick="ch1SetVal(7)">7</button>
+        <button class="preset-btn" onclick="ch1SetVal(8)">8</button>
+        <button class="preset-btn" onclick="ch1SetVal(13)">13</button>
+        <button class="preset-btn" onclick="ch1SetVal(42)">42</button>
+        <button class="preset-btn" onclick="ch1SetVal(127)">127</button>
+        <button class="preset-btn" onclick="ch1SetVal(255)">255</button>
+      </div>
+
+      <div class="formula-bar" id="ch1-formula"></div>
+
+      <div class="place-row" id="ch1-place-row"></div>
+      <div class="bit-row" id="ch1-bit-row"></div>
+      <div class="bit-index-row" id="ch1-index-row"></div>
+      <div class="contrib-row" id="ch1-contrib-row"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch1-result-value">0</span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch1-result-explain"></div>
+      </div>
+
+      <div class="analogy-panel">
+        <strong>Analogy:</strong> the only difference from decimal is that columns
+        multiply by 2 instead of 10, and each digit is 0 or 1 instead of 0&ndash;9.
+        <div class="analogy-grid">
+          <div class="analogy-col">
+            <div class="col-head">Decimal &mdash; 365</div>
+            3 &times; 100<br>
+            6 &times; 10<br>
+            5 &times; 1<br>
+            = <strong>365</strong>
+          </div>
+          <div class="analogy-col">
+            <div class="col-head">Binary &mdash; 101101101</div>
+            1&times;256 + 0&times;128 + 1&times;64<br>
+            + 1&times;32 + 0&times;16 + 1&times;8<br>
+            + 1&times;4 + 0&times;2 + 1&times;1<br>
+            = <strong>365</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      Try 7 and 8 in the presets.
+      Seven is <code>00000111</code>, which has the lowest three
+      bits turned on, which is 4+2+1.
+      Eight is <code>00001000</code>, which has a single bit turned on exactly one
+      position to the left, giving precisely 8.
+      In binary numbers, every power of 2 has a single active bit.
+      And every number just below that power of 2 is a sequence of ones.
+      This is one of the many patterns that come up constantly in <strong>bit manipulation</strong>.
+    </p>
+
+    <p>
+      The main take-away from this chapter is to acquire an intuition for binary numbers
+      as a sum over <i>powers of 2</i>, and how these can describe any positive integers.
+      But notice how we do not yet cover negative numbers.
+      Let's extend this intuition to negative numbers in the next chapter.
+    </p>
+
+  </div>
+
+  <nav class="navbar" style="margin-top: 2rem; margin-bottom: 0;">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="02-signed-integers.html">Signed Integers &rarr;</a>
+    </div>
+  </nav>
+
+  <script src="../js/bits.js"></script>
+  <script src="../js/demos/ch01-place-values.js"></script>
+  <script>
+    const MOON = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    const SUN  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function isDark() {
+      const t = document.documentElement.dataset.theme;
+      if (t === 'dark') return true;
+      if (t === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function updateIcon() {
+      document.getElementById('theme-icon').innerHTML = isDark() ? MOON : SUN;
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      updateIcon();
+    });
+
+    updateIcon();
+  </script>
+
+</body>
+</html>
