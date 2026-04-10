@@ -381,7 +381,7 @@ body {
 }
 .chapter-card {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
   padding: 12px 14px;
   background: var(--surface-2);
@@ -404,6 +404,12 @@ body {
   min-width: 72px;
   flex-shrink: 0;
 }
+.chapter-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
 .chapter-card-title {
   font-size: 0.95rem;
   font-weight: 600;
@@ -411,6 +417,25 @@ body {
 .chapter-card-desc {
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+.chapter-card-badge {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--amber-bg);
+  color: var(--amber-text);
+}
+.chapter-card--wip {
+  opacity: 0.6;
+  cursor: default;
+}
+.chapter-card--wip:hover {
+  border-color: var(--border);
+  background: var(--surface-2);
 }
 
 /* ── Responsive ── */
