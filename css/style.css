@@ -553,6 +553,23 @@ body {
   margin: 4px 0 4px 60px;
 }
 
+/* ── About page links box ── */
+.about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.about-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--blue-text);
+  text-decoration: none;
+}
+.about-link:hover { text-decoration: underline; }
+.about-link svg { flex-shrink: 0; color: var(--text-muted); }
+
 /* ── Responsive ── */
 @media (max-width: 480px) {
   .bit, .bit-index, .place-cell, .contrib-cell { width: 24px; }
