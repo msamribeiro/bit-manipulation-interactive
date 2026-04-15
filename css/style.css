@@ -16,6 +16,7 @@
   --red-bg:     #FCEBEB; --red-text:    #A32D2D;
   --amber-bg:   #FAEEDA; --amber-text:  #854F0B;
   --purple-bg:  #EEEDFE; --purple-text: #533AB7;
+  --zero-bg:    #EAF3DE; --zero-text:   #27500A; --zero-border: #3B6D11;
 }
 
 /* ── CSS variables (dark mode — system preference) ── */
@@ -29,6 +30,7 @@
     --red-bg:     #501313; --red-text:    #F7C1C1;
     --amber-bg:   #412402; --amber-text:  #FAC775;
     --purple-bg:  #26215C; --purple-text: #CECBF6;
+    --zero-bg:    #173404; --zero-text:   #C0DD97; --zero-border: #639922;
   }
 }
 
@@ -42,6 +44,7 @@
   --red-bg:     #501313; --red-text:    #F7C1C1;
   --amber-bg:   #412402; --amber-text:  #FAC775;
   --purple-bg:  #26215C; --purple-text: #CECBF6;
+  --zero-bg:    #173404; --zero-text:   #C0DD97; --zero-border: #639922;
 }
 
 /* ── Reset / base ── */
@@ -145,6 +148,20 @@ body {
   background: var(--surface-3);
   border-radius: 4px;
   padding: 1px 5px;
+}
+.prose pre {
+  background: var(--surface-3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  font-size: 0.88em;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
 }
 
 /* ── Chapter goals box ── */
@@ -457,6 +474,83 @@ body {
 .chapter-card--wip:hover {
   border-color: var(--border);
   background: var(--surface-2);
+}
+
+/* ── Metric cards (clock info panel, log₂ demo) ── */
+.metric-row {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+.metric {
+  flex: 1;
+  background: var(--surface-1);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+.metric-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.metric-value {
+  font-size: 22px;
+  font-weight: 500;
+  font-family: monospace;
+  color: var(--text-primary);
+}
+
+/* ── Step-advance button (demo stepper) ── */
+.step-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 0.5px solid var(--blue-border);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--blue-bg);
+  color: var(--blue-text);
+  transition: background 0.1s, color 0.1s;
+  margin-top: 10px;
+}
+.step-btn:hover {
+  background: var(--blue-text);
+  color: var(--surface-1);
+}
+
+/* ── Labeled operation rows (operators / negation demos) ── */
+.op-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.op-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.op-label {
+  width: 52px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+.op-value {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 6px;
+  min-width: 36px;
+}
+.op-divider {
+  height: 0;
+  border-top: 0.5px solid var(--border);
+  margin: 4px 0 4px 60px;
 }
 
 /* ── Responsive ── */

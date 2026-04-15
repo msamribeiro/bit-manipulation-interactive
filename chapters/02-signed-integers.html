@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signed Integers — Bit Manipulation</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    const t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  </script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="01-place-values.html">&larr; Binary Place Values</a>
+      <a href="03-operators.html">Bitwise Operators &rarr;</a>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+        <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="prose">
+
+    <div class="page-header">
+      <span class="chapter-label">Chapter 2</span>
+      <h1>Signed Integers</h1>
+    </div>
+
+    <div class="chapter-goals">
+      <span class="chapter-goals-label">Focus</span>
+      In this chapter, we will gain an intuitive understanding of 
+      how to encode negative numbers in binary through the two&rsquo;s complement approach.
+      By the end, we should be comfortable with how signed and unsigned integers are computed
+      and what range they cover.
+    </div>
+
+    <p>
+      In Chapter 1, we represented numbers from 0 to 255 using eight bits, where each bit
+      contributed a positive power of 2. But this only covers the number 0 and positive numbers.
+      How can we efficiently represent negative numbers in binary?
+    </p>
+    <p>
+      Perhaps a common answer would be something like:
+      &ldquo;let's treat the leftmost bit as the sign
+      and let the remaining seven bits represent the magnitude.&rdquo;
+      This <em>sign-magnitude</em> encoding is intuitive, but it
+      does not scale well, as addition does not work seamlessly.
+      For example, adding +3 and &minus;3 in sign-magnitude does
+      not produce zero without special-casing the signs.
+    </p>
+
+    <p>
+      So what would be a good alternative? 
+      We can keep the same formula, where each bit position contributes a power of 2, but instead
+      we let the leftmost bit contribute a <strong>negative power of 2</strong>.
+      In an 8-bit representation, the leftmost bit, also called <em>the most significant bit</em>, is bit 7,
+      and it contributes <strong>&minus;128</strong> instead of +128. 
+      Bits 0&ndash;6 continue to contribute their usual positive values.
+      The full conversion formula for an 8-bit signed integer is:
+    </p>
+
+    <p>
+      <code>value = <strong>&minus;b<sub>7</sub>&middot;128</strong> + b<sub>6</sub>&middot;64 + b<sub>5</sub>&middot;32 + b<sub>4</sub>&middot;16 + b<sub>3</sub>&middot;8 + b<sub>2</sub>&middot;4 + b<sub>1</sub>&middot;2 + b<sub>0</sub>&middot;1</code>
+    </p>
+
+    <p>
+      Notice the sign change in the first term of this equation!
+      That single sign change is enough to produce any integer from &minus;128 to 127.
+      When bit 7 is off, the formula is identical to the unsigned case, giving 0 to 127.
+      When bit 7 is on, we start from &minus;128 and then add back whatever the lower seven bits
+      contribute: from 0 (giving &minus;128) up to 127 (giving &minus;1).
+      This type of encoding is called <strong>two&rsquo;s complement</strong>.
+      The advantage of two&rsquo;s complement is that +3 and &minus;3 add to 0 directly in binary with no special cases.
+    </p>
+
+    <p>
+      The demo below lets us visualize how signed integers are represented
+      in binary using two&rsquo;s complement.
+    </p>
+
+    <!-- ── Demo 2.1 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 2.1 &mdash; Two&rsquo;s Complement Explorer</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch2SetVal(0)">0</button>
+        <button class="preset-btn" onclick="ch2SetVal(1)">1</button>
+        <button class="preset-btn" onclick="ch2SetVal(127)">127</button>
+        <button class="preset-btn" onclick="ch2SetVal(-1)">&minus;1</button>
+        <button class="preset-btn" onclick="ch2SetVal(-128)">&minus;128</button>
+        <button class="preset-btn" onclick="ch2SetVal(-42)">&minus;42</button>
+        <button class="preset-btn" onclick="ch2SetVal(42)">42</button>
+      </div>
+
+      <div class="formula-bar" id="ch2-formula"></div>
+
+      <div class="place-row" id="ch2-place-row"></div>
+      <div class="bit-row" id="ch2-bit-row"></div>
+      <div class="bit-index-row" id="ch2-index-row"></div>
+      <div class="contrib-row" id="ch2-contrib-row"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch2-result-value">0</span>
+        <span class="result-label">decimal</span>
+        <span class="result-label" style="margin-left:1rem;font-size:11px">range: &minus;128 to 127</span>
+        <div class="result-explain" id="ch2-result-explain"></div>
+      </div>
+    </div>
+
+    <p>
+      For a negative value, the sign bit contributes &minus;128 and the remaining bits add back toward zero.
+      For a positive value, the sign bit is off and the lower bits work exactly as in the unsigned case.
+    </p>
+
+    <p>
+      In the demo, try the preset &minus;1 to see how all eight bits are on, giving
+      <code>&minus;128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = &minus;128 + 127 = &minus;1</code>.
+      We can now better understand the difference between signed and unsigned representations.
+      In the unsigned case, the all-ones pattern means 255; whereas in the signed case, it means &minus;1.
+      The bit pattern is identical, but the interpretation changes.
+    </p>
+
+    <p>
+      Based on this intuition, we can notice that the range of signed integers
+      is asymmetric: &minus;128 to 127.
+      There are 128 negative values but only 127 positive values (plus zero).
+      The reason is that we split the number line, and the number zero occupies one of the 256 slots,
+      leaving 128 for negatives and only 127 for positives.
+      The all-zeros pattern is 0, not &minus;0, so
+      &minus;128 has no positive counterpart.
+      This asymmetry is why negating the
+      minimum value (&minus;128) overflows and produces &minus;128 again.
+    </p>
+
+    <p>
+      This is best understood through a circular diagram.
+      In two&rsquo;s complement, the integers are
+      arranged in a circle. Moving clockwise adds 1; moving counter-clockwise subtracts 1.
+      The transition from &minus;1 to 0 (crossing the top) is normal and
+      requires no special handling. The transition from 127 to &minus;128 (crossing the
+      bottom) is overflow.
+      The value wraps around to the opposite extreme.
+    </p>
+    <p>
+      The demo below explores this idea interactively.
+      We'll use a 4-bit pattern for convenience.
+      The range of a signed 4-bit representation is &minus;8 to 7.
+      In the circular diagram below, 0 sits at the top, transitioning from negative to positive numbers.
+      Crossing the bottom means transitioning from 7 to &minus;8.
+    </p>
+    <!-- ── Demo 2.2 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 2.2 &mdash; Two&rsquo;s Complement Number Circle</div>
+
+      <!-- SVG is built entirely by ch2BuildClock() in ch02-signed-integers.js -->
+      <svg id="ch2-clock-svg" viewBox="0 0 680 560" width="100%" style="display:block"></svg>
+
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-label">decimal</div>
+          <div class="metric-value" id="ch2-clock-decimal">&mdash;</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">unsigned</div>
+          <div class="metric-value" id="ch2-clock-unsigned">&mdash;</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">hex</div>
+          <div class="metric-value" id="ch2-clock-hex">&mdash;</div>
+        </div>
+      </div>
+
+      <div class="bit-row" id="ch2-clock-bits" style="justify-content:center;margin-bottom:8px"></div>
+      <div class="result-explain" id="ch2-clock-hint" style="text-align:center;min-height:2.5em"></div>
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:10px">
+        <button class="preset-btn" onclick="ch2ClockPrev()">&larr; prev</button>
+        <span id="ch2-clock-nav-label" style="font-size:13px;font-family:monospace;color:var(--text-muted);min-width:64px;text-align:center"></span>
+        <button class="preset-btn" onclick="ch2ClockNext()">next &rarr;</button>
+      </div>
+    </div>
+
+    <p>
+      Ordinary binary addition works out of the box in two&rsquo;s complement.
+      When we add the bit patterns for +1 and &minus;1 with standard
+      carry rules, we get all-zeros, which represents the number 0.
+      We do not need special hardware or special handling of bit positions and values.
+    </p>
+
+<pre><code>  11111111  (−1)
++ 00000001  (+1)
+  ────────
+  00000000  (0, carry out discarded)
+</code></pre>
+
+    <p>
+      Another key property of two&rsquo;s complement is that we can find the negative of any number
+      by simply flipping all the bits, then adding 1. 
+      &ldquo;Flipping all the bits&rdquo; is also the same as taking the bitwise complement,
+      or applying the NOT bitwise operation, which we will cover in the following chapter.
+
+      For example, take x = 5 (00000101). &tilde;x is 11111010 = &minus;6. &minus;6 + 1 = &minus;5.
+      In general, if we want &minus;x, we can simply compute it as &tilde;x&nbsp;+&nbsp;1,
+      where &tilde; means flip all bits. 
+      The reason is that x&nbsp;+&nbsp;&tilde;x is always
+      all-ones (each pair of opposite bits sums to 1), which equals &minus;1 in two&rsquo;s
+      complement, so &tilde;x&nbsp;=&nbsp;&minus;x&nbsp;&minus;&nbsp;1, and therefore
+      &tilde;x&nbsp;+&nbsp;1&nbsp;=&nbsp;&minus;x.
+    </p>
+
+    <!-- ── Demo 2.3 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 2.3 &mdash; Flip-and-Add-1 Negation</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch2NegSetVal(1)">1</button>
+        <button class="preset-btn" onclick="ch2NegSetVal(5)">5</button>
+        <button class="preset-btn" onclick="ch2NegSetVal(42)">42</button>
+        <button class="preset-btn" onclick="ch2NegSetVal(-1)">&minus;1</button>
+        <button class="preset-btn" onclick="ch2NegSetVal(127)">127</button>
+        <button class="preset-btn" onclick="ch2NegSetVal(-128)">&minus;128</button>
+      </div>
+
+      <div class="formula-bar" id="ch2-neg-formula"></div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">x</span>
+          <div class="bit-row" id="ch2-neg-row-x"></div>
+          <span class="op-value" id="ch2-neg-val-x"></span>
+        </div>
+        <div id="ch2-neg-row2-wrap" style="display:none">
+          <div class="op-row">
+            <span class="op-label">~x</span>
+            <div class="bit-row" id="ch2-neg-row-notx"></div>
+            <span class="op-value" id="ch2-neg-val-notx"></span>
+          </div>
+        </div>
+        <div id="ch2-neg-row3-wrap" style="display:none">
+          <div class="op-divider"></div>
+          <div class="op-row">
+            <span class="op-label">~x&nbsp;+&nbsp;1</span>
+            <div class="bit-row" id="ch2-neg-row-result"></div>
+            <span class="op-value" id="ch2-neg-val-result"></span>
+          </div>
+        </div>
+      </div>
+
+      <button class="step-btn" id="ch2-neg-step-btn" onclick="ch2NegAdvance()">Flip all bits &rarr;</button>
+
+      <div class="result-box" id="ch2-neg-result-box" style="display:none">
+        <span class="result-value" id="ch2-neg-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch2-neg-result-explain"></div>
+      </div>
+    </div>
+
+
+    <p>
+      In this chapter, we introduced two&rsquo;s complement to illustrate how negative integers
+      are encoded in binary.
+      The main takeaway is that, in two&rsquo;s complement,
+      the sign bit is worth &minus;128 instead of +128. Negative numbers are not
+      stored as &ldquo;a sign plus a magnitude&rdquo;. Instead, they are stored as a bit pattern
+      whose value, computed by the exact same formula, happens to be negative.
+    </p>
+
+  </div>
+
+  <nav class="navbar" style="margin-top: 2rem; margin-bottom: 0;">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="01-place-values.html">&larr; Binary Place Values</a>
+      <a href="03-operators.html">Bitwise Operators &rarr;</a>
+    </div>
+  </nav>
+
+  <script src="../js/bits.js"></script>
+  <script src="../js/demos/ch02-signed-integers.js"></script>
+  <script>
+    const MOON = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    const SUN  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function isDark() {
+      const t = document.documentElement.dataset.theme;
+      if (t === 'dark') return true;
+      if (t === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function updateIcon() {
+      document.getElementById('theme-icon').innerHTML = isDark() ? MOON : SUN;
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      updateIcon();
+    });
+
+    updateIcon();
+  </script>
+
+</body>
+</html>

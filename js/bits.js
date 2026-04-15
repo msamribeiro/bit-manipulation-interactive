@@ -46,14 +46,16 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-/* ── makeIndexRow(container, bitWidth) ───────────────────────
+/* ── renderIndexRow(container, bitWidth) ─────────────────────
    Render a row of bit-position labels into `container`.
    Labels count down from bitWidth-1 (MSB, leftmost) to 0 (LSB).
    Clears the container before rendering.
 
    Produces: <div class="bit-index">7</div> ... <div class="bit-index">0</div>
+
+   makeIndexRow is kept as an alias for backwards compatibility.
 ---------------------------------------------------------------- */
-function makeIndexRow(container, bitWidth) {
+function renderIndexRow(container, bitWidth) {
   container.innerHTML = '';
   for (let i = 0; i < bitWidth; i++) {
     const el = document.createElement('div');
@@ -62,6 +64,7 @@ function makeIndexRow(container, bitWidth) {
     container.appendChild(el);
   }
 }
+const makeIndexRow = renderIndexRow;
 
 /* ── renderBitRow(container, value, bitWidth, colorFn, clickFn)
    The central rendering function. Every demo calls this.
@@ -113,6 +116,74 @@ function renderBitRow(container, value, bitWidth, colorFn, clickFn) {
 
     container.appendChild(el);
   }
+}
+
+/* ── toSigned(unsigned, bits) ────────────────────────────────
+   Interpret an n-bit unsigned integer as its two's complement
+   signed value.
+
+   Examples:
+     toSigned(0xFF, 8) → −1
+     toSigned(0x80, 8) → −128
+     toSigned(0x0F, 4) → −1
+     toSigned(0x08, 4) → −8
+---------------------------------------------------------------- */
+function toSigned(unsigned, bits) {
+  const threshold = 1 << (bits - 1);
+  return unsigned >= threshold ? unsigned - (1 << bits) : unsigned;
+}
+
+/* ── svgEl(tag, attrs) ───────────────────────────────────────
+   Create an SVG element with attributes set in one call.
+   The special key 'textContent' sets the element's text content
+   (it is a property, not an attribute, so needs special handling).
+   Returns the created SVGElement.
+
+   Example:
+     svgEl('circle', { cx: 10, cy: 10, r: 5, fill: 'red' })
+---------------------------------------------------------------- */
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'textContent') el.textContent = v;
+    else el.setAttribute(k, v);
+  }
+  return el;
+}
+
+/* ── circleX / circleY ───────────────────────────────────────
+   Compute x or y coordinate of a point on a circle.
+
+   Convention: angleDeg 0° = right (3 o'clock), clockwise positive.
+   This matches the SVG coordinate system (positive y downward).
+
+   Examples:
+     circleX(100, 50, 0)    → 150   (rightmost point)
+     circleX(100, 50, 90)   → 100   (bottom)
+     circleY(100, 50, 90)   → 150   (bottom)
+---------------------------------------------------------------- */
+function circleX(cx, r, angleDeg) {
+  return cx + r * Math.cos(angleDeg * Math.PI / 180);
+}
+function circleY(cy, r, angleDeg) {
+  return cy + r * Math.sin(angleDeg * Math.PI / 180);
+}
+
+/* ── clockNodeColors(signedVal) ──────────────────────────────
+   Return fill, stroke, and text colour strings for a clock node
+   given its signed integer value.
+
+   Reads CSS variables at call time so light/dark mode switching
+   is automatic — no hard-coded colours here.
+
+   Returns: { fill, stroke, text }
+---------------------------------------------------------------- */
+function clockNodeColors(signedVal) {
+  const s   = getComputedStyle(document.documentElement);
+  const get = (name) => s.getPropertyValue(name).trim();
+  if (signedVal === 0) return { fill: get('--zero-bg'),  stroke: get('--zero-border'), text: get('--zero-text') };
+  if (signedVal  > 0) return { fill: get('--blue-bg'),  stroke: get('--blue-border'), text: get('--blue-text') };
+  return                     { fill: get('--red-bg'),   stroke: get('--red-text'),    text: get('--red-text')  };
 }
 
 /* ── decodeIEEE754(bitArray, expBits, mantBits) ──────────────
