@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitwise Operators &mdash; Bit Manipulation</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    const t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  </script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="02-signed-integers.html">&larr; Signed Integers</a>
+      <a href="04-shifts.html">Bit Shifts &rarr;</a>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+        <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="prose">
+
+    <div class="page-header">
+      <span class="chapter-label">Chapter 3</span>
+      <h1>Bitwise Operators</h1>
+    </div>
+
+    <div class="chapter-goals">
+      <span class="chapter-goals-label">Focus</span>
+      In this chapter, we will develop our intuition for the four logical bitwise operators:
+      AND, OR, XOR, and NOT.
+      If we interpret one of the operands as a bit mask, AND filters bits, OR sets them, and XOR toggles them.
+      The bitwise operator NOT is unary and simply flips all bits.
+      We will visualize these behaviours on 8-bit values using interactive demos.
+      By the end of the chapter, we will be able to recognize which operator to use 
+      when selecting, forcing, toggling, or flipping bits.
+    </div>
+
+    <p>
+      In Chapters 1 and 2 we learned how integers are encoded in binary.
+      Now we will begin to look at operations that work directly on those bit patterns.
+      Bitwise operators are applied <strong>position by position</strong>: each output bit
+      depends only on the corresponding input bits at the same position. There is no
+      dependence between positions. Operations like carry, borrowing, etc are not used. 
+      This is what distinguishes bitwise operators from standard arithmetic operations like addition.
+      There are four standard bitwise operators: AND, OR, XOR, and NOT.
+    </p>
+
+    <p>
+      A useful mental model for bitwise operators like AND, OR, and XOR is to think of
+      one operand as the <em>value</em> and the other as a <em>mask</em>.
+      The mask determines which positions are affected and how.
+      This will become more intuitive as we progress to Chapters 4 (bit shifts) and 6 (masks).
+      In the demos below, we define bitwise operations between two operands <code>A</code> and <code>B</code>.
+    </p>
+
+    <h2>AND</h2>
+
+    <p>
+      AND produces 1 only where <em>both</em> inputs are 1. 
+      We can think of AND as a <strong>filter</strong>.
+      If we think of one operand as the value, and the other as a mask, then AND is simply a filter that blocks or allows bits.
+      Wherever the mask has a 1, the value&rsquo;s bit passes through unchanged. 
+      Wherever the mask has a 0, the output is forced to 0, and that bit is blocked.
+      This makes AND useful for reading and testing bits: a mask with
+      a single 1 can isolate that one bit from the rest.
+    </p>
+
+    <!-- ── Demo 3.1 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 3.1 &mdash; AND</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch3AndPreset('low4')">low 4 bits</button>
+        <button class="preset-btn" onclick="ch3AndPreset('high4')">high 4 bits</button>
+        <button class="preset-btn" onclick="ch3AndPreset('even')">even check</button>
+        <button class="preset-btn" onclick="ch3AndPreset('nn1')">n &amp; (n&minus;1)</button>
+      </div>
+
+      <div class="formula-bar" id="ch3-and-formula"></div>
+
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-size:13px">A:
+          <input type="number" id="ch3-and-a-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3AndSetA(+this.value)">
+        </label>
+        <label style="font-size:13px">B (mask):
+          <input type="number" id="ch3-and-b-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3AndSetB(+this.value)">
+        </label>
+      </div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">A</span>
+          <div class="bit-row" id="ch3-and-row-a"></div>
+          <span class="op-value" id="ch3-and-val-a"></span>
+        </div>
+        <div class="op-row">
+          <span class="op-label">B</span>
+          <div class="bit-row" id="ch3-and-row-b"></div>
+          <span class="op-value" id="ch3-and-val-b"></span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-row">
+          <span class="op-label">A &amp; B</span>
+          <div class="bit-row" id="ch3-and-row-result"></div>
+          <span class="op-value" id="ch3-and-val-result"></span>
+        </div>
+      </div>
+
+      <div class="bit-index-row" id="ch3-and-index-row"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch3-and-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch3-and-result-explain"></div>
+      </div>
+    </div>
+
+    <details class="collapsible">
+      <summary>Notes on the presets</summary>
+      <div class="collapsible-body">
+        <p>
+          The first two presets show AND as a range selector: a mask of <code>00001111</code>
+          passes only the bottom four bits, while <code>11110000</code> passes only the top four.
+          This is how a program extracts a field from a packed integer. We will see this later in Chapter 7.
+        </p>
+        <p>
+          The <em>even check</em> preset uses the single-bit mask <code>00000001</code>:
+          since only bit 0 determines parity, <code>A &amp; 1</code> returns 0 for even
+          values and 1 for odd ones. All higher bits are powers of 2 greater than 1, so
+          they contribute nothing to whether the total is even or odd.
+        </p>
+        <p>
+          The <em>n &amp; (n&minus;1)</em> preset is a well-known trick in bit manipulation:
+          subtracting 1 from any integer clears its lowest set bit and fills all lower positions with 1s, so
+          applying AND on the two values erases exactly that bit. The result is zero if and only if
+          <code>n</code> was a power of two.
+        </p>
+      </div>
+    </details>
+
+    <h2>OR</h2>
+
+    <p>
+      OR produces 1 wherever <em>either</em> input is 1. 
+
+      We can think of <strong>OR as a setter</strong>.
+      The output is 0 only when both inputs are 0.
+      Where the mask has a 1, the output bit is forced to 1 regardless of the original bit value.
+      Where the mask has a 0, the input bit passes through unchanged.
+      This is the complement of AND&rsquo;s filter role.
+      Instead of clearing bits, OR sets them.
+    </p>
+
+    <!-- ── Demo 3.2 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 3.2 &mdash; OR</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch3OrPreset('setbit0')">set bit 0</button>
+        <button class="preset-btn" onclick="ch3OrPreset('highnibble')">set high 4 bits</button>
+        <button class="preset-btn" onclick="ch3OrPreset('lowercase')">&lsquo;A&rsquo; &rarr; &lsquo;a&rsquo;</button>
+      </div>
+
+      <div class="formula-bar" id="ch3-or-formula"></div>
+
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-size:13px">A:
+          <input type="number" id="ch3-or-a-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3OrSetA(+this.value)">
+        </label>
+        <label style="font-size:13px">B (mask):
+          <input type="number" id="ch3-or-b-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3OrSetB(+this.value)">
+        </label>
+      </div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">A</span>
+          <div class="bit-row" id="ch3-or-row-a"></div>
+          <span class="op-value" id="ch3-or-val-a"></span>
+        </div>
+        <div class="op-row">
+          <span class="op-label">B</span>
+          <div class="bit-row" id="ch3-or-row-b"></div>
+          <span class="op-value" id="ch3-or-val-b"></span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-row">
+          <span class="op-label">A | B</span>
+          <div class="bit-row" id="ch3-or-row-result"></div>
+          <span class="op-value" id="ch3-or-val-result"></span>
+        </div>
+      </div>
+
+      <div class="bit-index-row" id="ch3-or-index-row"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch3-or-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch3-or-result-explain"></div>
+      </div>
+    </div>
+
+    <details class="collapsible">
+      <summary>Notes on the presets</summary>
+      <div class="collapsible-body">
+        <p>
+          The <em>set high 4 bits</em> preset uses OR to activate the top four bit positions
+          while leaving the bottom four unchanged. This is a common way to force a group of
+          bits to be on without disturbing the rest.
+        </p>
+        <p>
+          The <em>&lsquo;A&rsquo; &rarr; &lsquo;a&rsquo;</em> preset illustrates that binary
+          sequences can encode more than integers &mdash; characters, colours, flags, and more.
+          Computers store characters as binary
+          representations, and in the ASCII encoding, every uppercase letter differs from its
+          lowercase counterpart by exactly one bit (bit 5). OR with <code>0x20</code> sets
+          that bit, converting any uppercase letter to lowercase in a single trivial operation.
+        </p>
+        <p>
+          Another aside: <code>0x20</code> is 32 in decimal, or <code>00100000</code> in binary,
+          which is bit 5, and nothing else.
+          The <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank" rel="noopener noreferrer">ASCII</a> table was designed so that every uppercase letter and its lowercase counterpart
+          differ by exactly 32. <code>'A'</code> is 65 (<code>01000001</code>) and <code>'a'</code> is 97 (<code>01100001</code>).
+          The only difference is bit 5.
+          This holds for the entire alphabet: 'B'/'b', 'Z'/'z', etc.
+          It was a deliberate choice by the ASCII committee in the 1960s so that case conversion could be done with a
+          single bitwise operation rather than a lookup table.
+        </p>
+      </div>
+    </details>
+
+    <h2>XOR</h2>
+
+    <p>
+      XOR (exclusive OR) produces 1 where the inputs <em>differ</em>.
+      We can think of <strong>XOR as a toggler</strong>.
+      The output is 1 when the inputs differ, 0 when they are the same.
+      Where the mask has a 1, the bit is flipped. Where the mask has a 0, the bit passes through unchanged. 
+      XOR has one important property: equal inputs always produce 0.
+      A &oplus; A = 0 for any A, because every bit cancels its twin.
+    </p>
+
+    <!-- ── Demo 3.3 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 3.3 &mdash; XOR</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch3XorPreset('flipall')">flip all bits</button>
+        <button class="preset-btn" onclick="ch3XorPreset('togglebit0')">toggle bit 0</button>
+        <button class="preset-btn" onclick="ch3XorPreset('cancel')">A &oplus; A = 0</button>
+        <button class="preset-btn" onclick="ch3XorPreset('caseflip')">case flip</button>
+      </div>
+
+      <div class="formula-bar" id="ch3-xor-formula"></div>
+
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-size:13px">A:
+          <input type="number" id="ch3-xor-a-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3XorSetA(+this.value)">
+        </label>
+        <label style="font-size:13px">B (mask):
+          <input type="number" id="ch3-xor-b-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3XorSetB(+this.value)">
+        </label>
+      </div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">A</span>
+          <div class="bit-row" id="ch3-xor-row-a"></div>
+          <span class="op-value" id="ch3-xor-val-a"></span>
+        </div>
+        <div class="op-row">
+          <span class="op-label">B</span>
+          <div class="bit-row" id="ch3-xor-row-b"></div>
+          <span class="op-value" id="ch3-xor-val-b"></span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-row">
+          <span class="op-label">A ^ B</span>
+          <div class="bit-row" id="ch3-xor-row-result"></div>
+          <span class="op-value" id="ch3-xor-val-result"></span>
+        </div>
+      </div>
+
+      <div class="bit-index-row" id="ch3-xor-index-row"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch3-xor-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch3-xor-result-explain"></div>
+      </div>
+    </div>
+
+    <details class="collapsible">
+      <summary>Notes on the presets</summary>
+      <div class="collapsible-body">
+        <p>
+          The <em>flip all bits</em> preset sets the mask to <code>11111111</code>, which
+          flips every position in A. The result is identical to NOT, but achieved with
+          a binary operator rather than a unary one.
+        </p>
+        <p>
+          The <em>toggle bit 0</em> preset flips only position 0, switching a number between
+          even and odd.
+        </p>
+        <p>
+          The <em>A &oplus; A = 0</em> preset demonstrates one of XOR&rsquo;s defining
+          identities: when both operands are the same value, every bit cancels its twin and
+          the result is always zero. This appears often in low-level code when a value needs
+          to be zeroed quickly.
+        </p>
+        <p>
+          The <em>case flip</em> preset revisits the ASCII encoding from the OR demo: where
+          OR with <code>0x20</code> could only convert uppercase to lowercase, XOR with
+          <code>0x20</code> goes in either direction. It toggles bit 5, so uppercase
+          becomes lowercase and lowercase becomes uppercase in a single-bit operation.
+        </p>
+      </div>
+    </details>
+
+    <h2>NOT</h2>
+
+    <p>
+      NOT is the only <em>unary</em> bitwise operator. 
+      A unary operator means that it only takes a single operand, so we don't really use
+      masks with NOT.
+      This operator takes that single input and simply flips every bit.
+      In most languages it is written <code>~A</code>.
+    </p>
+
+    <!-- ── Demo 3.4 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 3.4 &mdash; NOT</div>
+
+      <div class="formula-bar" id="ch3-not-formula"></div>
+
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-size:13px">A:
+          <input type="number" id="ch3-not-a-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch3NotSetA(+this.value)">
+        </label>
+      </div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">A</span>
+          <div class="bit-row" id="ch3-not-row-a"></div>
+          <span class="op-value" id="ch3-not-val-a"></span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-row">
+          <span class="op-label">~A</span>
+          <div class="bit-row" id="ch3-not-row-result"></div>
+          <span class="op-value" id="ch3-not-val-result"></span>
+        </div>
+      </div>
+
+      <div class="bit-index-row" id="ch3-not-index-row"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch3-not-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch3-not-result-explain"></div>
+      </div>
+    </div>
+
+    <details class="collapsible">
+      <summary>Notes</summary>
+      <div class="collapsible-body">
+        <p>
+          The bitwise operator NOT has the arithmetic identity <code>~A = &minus;A &minus; 1</code>.
+          Since every bit in A is the complement of the corresponding bit in ~A, we can see that
+          <code>A + ~A</code> always produces all-ones &mdash; each position contributes exactly one 1 with no carry.
+          In two&rsquo;s complement, all-ones equals &minus;1, so <code>A + ~A = &minus;1</code>, which gives
+          <code>~A = &minus;A &minus; 1</code>.
+          We can relate this to the <em>flip-and-add-1</em> operation used to find the negative of any number (see the demo in Chapter 2).
+        </p>
+      </div>
+    </details>
+
+    <h2>Conclusion</h2>
+    <p>
+      AND, OR, XOR, and NOT are the four logical bitwise operators.
+      Using the mask mental model, we can think of AND, OR, XOR as operators that use
+      bit masks to <em>filter</em>, <em>set</em>, and <em>toggle</em> bits at selected positions.
+      The operator NOT is a unary operator (no mask) that simply flips all bits.
+      Together, these four logical operators cover
+      every way to select, force, flip, or invert bits at a chosen position.
+      We will see this in more detail in upcoming chapters.
+    </p>
+    <p>
+      In Chapter 4 we will look at shifts, a related family of operations that move
+      the entire bit pattern left or right, before applying all of these tools to
+      concrete bit tasks in Chapter 5.
+    </p>
+
+  </div>
+
+  <nav class="navbar" style="margin-top:2rem;margin-bottom:0">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="02-signed-integers.html">&larr; Signed Integers</a>
+      <a href="04-shifts.html">Bit Shifts &rarr;</a>
+    </div>
+  </nav>
+
+  <script src="../js/bits.js"></script>
+  <script src="../js/demos/ch03-operators.js"></script>
+  <script>
+    const MOON = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    const SUN  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function isDark() {
+      const t = document.documentElement.dataset.theme;
+      if (t === 'dark') return true;
+      if (t === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function updateIcon() {
+      document.getElementById('theme-icon').innerHTML = isDark() ? MOON : SUN;
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      updateIcon();
+    });
+
+    updateIcon();
+  </script>
+
+</body>
+</html>
