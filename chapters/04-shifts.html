@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bit Shifts &mdash; Bit Manipulation</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    const t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  </script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="03-operators.html">&larr; Bitwise Operators</a>
+      <a href="05-masks.html">Masks &rarr;</a>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+        <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="prose">
+
+    <div class="page-header">
+      <span class="chapter-label">Chapter 4</span>
+      <h1>Bit Shifts</h1>
+    </div>
+
+    <div class="chapter-goals">
+      <span class="chapter-goals-label">Focus</span>
+      We will explore the three shift operators: left shift (<code>&lt;&lt;</code>),
+      logical right shift (<code>&gt;&gt;&gt;</code>), and arithmetic right shift (<code>&gt;&gt;</code>).
+      Shifting left multiplies by a power of two; shifting right divides by a power of two. There are
+      two ways to shift right, varying in how we handle the fill value.
+      By the end of the chapter, we will understand what each of the shift operators does,
+      and how bits are handled as sequences are shifted.
+    </div>
+
+    <p>
+      In the decimal system, multiplying by 10 is simple: just append a zero.
+      The digit 4 becomes 40; 23 becomes 230. The digits themselves do not change.
+      Instead, they all move one column to the left, and an empty column at the right is filled with a zero.
+      This is intuitive if we think back on how we described base-10 and base-2 numbers in Chapter 1.
+      Binary works exactly the same way, except the base is 2, so moving one column left
+      means multiplying by 2 instead of 10.
+      The inverse operation is also similar. If we move digits to the right, we can drop those that fall off the edge,
+      and we can pad with zeros. So the number 421 can become 042, which is 42. This is just like dividing by 10 and rounding down.
+    </p>
+    <p>
+      Bit shifts are the formal name for this column-moving operation on binary numbers.
+      There are three shift operators: one left shift operator, and two right shift operators.
+    </p>
+
+    <h2>Left Shift <code>&lt;&lt;</code></h2>
+
+    <p>
+      The left shift operator is written as <code>A &lt;&lt; n</code>.
+      It moves every bit in <code>A</code> exactly <code>n</code> positions to the left.
+      There are only two things to remember: the <code>n</code> vacant positions on the right
+      are filled with zeros, and any bits that fall off the left end are discarded.
+    </p>
+    <p>
+      Because each bit position represents a power of two, shifting one place to the left
+      moves every bit to a column worth twice as much. Shifting by <code>n</code>
+      multiplies by 2<sup>n</sup>.
+    </p>
+    <p>
+      Let&rsquo;s work through an example.
+      We begin with the binary number <code>00000011</code>, which is 3 in decimal.
+      We want to left-shift by two positions, so we write <code>3 &lt;&lt; 2</code>.
+      The bits move two places to the left, the two rightmost columns are filled with zeros,
+      and we get <code>00001100</code>.
+      This is <code>3 &times; 2<sup>2</sup> = 3 &times; 4 = 12</code>.
+      And <code>00001100</code> is precisely 12 in decimal.
+    </p>
+    <p>
+      This works as long as none of the high bits that get shifted out were set to 1.
+      If they were, the multiplication overflows and the high-order information is simply lost.
+      This is by design and not an error in most programming languages.
+    </p>
+
+    <h3>Interactive Left Shift Demo</h3>
+    <p>
+      The demo below marks the bits that will be discarded in red so that we can see exactly when overflow occurs.
+      Remember that the demo is using an 8-bit unsigned representation. This covers the 0 to 255 range.
+      Intuitively, overflow occurs when the result of the multiplication is outside of the supported range.
+    </p>
+
+    <!-- ── Demo 4.1 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 4.1 &mdash; Left Shift</div>
+
+      <div class="preset-row">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch4LPreset('x2')">&#215;2</button>
+        <button class="preset-btn" onclick="ch4LPreset('x4')">&#215;4</button>
+        <button class="preset-btn" onclick="ch4LPreset('overflow')">overflow</button>
+        <button class="preset-btn" onclick="ch4LPreset('clearlowerbits')">clear lower bits</button>
+      </div>
+
+      <div class="formula-bar" id="ch4l-formula"></div>
+
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-size:13px">A:
+          <input type="number" id="ch4l-a-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch4LSetVal(+this.value)">
+        </label>
+        <label style="font-size:13px">shift n:
+          <input type="number" id="ch4l-shift-num" min="0" max="7" style="width:50px;margin-left:4px"
+                 oninput="ch4LSetShift(+this.value)">
+        </label>
+        <input type="range" id="ch4l-shift-slider" min="0" max="7" style="width:120px"
+               oninput="ch4LSliderInput(+this.value)">
+      </div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">A</span>
+          <div class="bit-row" id="ch4l-a-row"></div>
+          <span class="op-value" id="ch4l-a-val"></span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-row">
+          <span class="op-label">A &lt;&lt; n</span>
+          <div class="bit-row" id="ch4l-result-row"></div>
+          <span class="op-value" id="ch4l-result-val-label"></span>
+        </div>
+      </div>
+
+      <div class="bit-index-row" id="ch4l-index-row" style="margin-left:60px"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch4l-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch4l-result-explain"></div>
+      </div>
+    </div>
+
+    <details class="collapsible">
+      <summary>Notes on the presets</summary>
+      <div class="collapsible-body">
+        <p>
+          The <em>&#215;2</em> and <em>&#215;4</em> presets illustrate the multiplication directly.
+          The &#215;4 preset uses A&nbsp;=&nbsp;3 and n&nbsp;=&nbsp;2,
+          matching the example we worked through together above.
+          The bit row shows those two positions moving left and two zeros filling in on the right.
+        </p>
+        <p>
+          The <em>overflow</em> preset (200&nbsp;&lt;&lt;&nbsp;2) shows what happens when
+          significant bits reach the edge and fall off. The mathematical result would be 800,
+          but the 8-bit value truncates to 32. The discarded bits are highlighted in red
+          so that we can see which information is lost.
+        </p>
+        <p>
+          The <em>clear lower bits</em> preset (183&nbsp;&lt;&lt;&nbsp;4) shows how
+          left-shifts can be used to clear bit positions.
+          In the example, the bottom 4 positions are filled with zeros.
+          The upper bits move left and any that fall off are discarded.
+        </p>
+      </div>
+    </details>
+
+    <h2>Right Shifts</h2>
+
+    <p>
+      Shifting right is the inverse of the left shift: every bit moves <code>n</code> positions to the right,
+      the <code>n</code> low bits are discarded, and the <code>n</code> vacated positions
+      at the top need to be filled with something.
+      There are <em>two variants of the right shift</em>, depending on the value used to fill those positions.
+    </p>
+
+    <h3>Logical right shift <code>&gt;&gt;&gt;</code></h3>
+
+    <p>
+      The logical right shift always fills the vacated positions with <strong>0</strong>,
+      regardless of the original sign bit. It treats the value as a plain unsigned bit pattern.
+      This makes it the right choice for unsigned integers: dividing 128 by 2 with a logical
+      shift gives 64, as expected. Care must be taken when using a logical right shift with signed integers,
+      as the sign bit is overwritten with 0.
+    </p>
+
+    <h3>Arithmetic right shift <code>&gt;&gt;</code></h3>
+
+    <p>
+      The arithmetic right shift fills the vacated positions with <strong>copies of the sign bit</strong>.
+      If the sign bit is 0 (positive value), it fills with zeros. This is identical to a logical shift.
+      If the sign bit is 1 (negative value), it fills with ones, keeping the result negative.
+    </p>
+
+    <h3>Example</h3>
+    <p>
+      Consider the 8-bit value <code>11111000</code>, which is &minus;8 in two&rsquo;s complement.
+      We know that &minus;8 divided by 2 is &minus;4.
+      With the <em>logical right shift</em> we write <code>&minus;8 &gt;&gt;&gt; 1</code>:
+      bits move one position right, the top is filled with 0, and we get <code>01111100</code>.
+      Interpreted as a signed integer, that is +124, which is wrong.
+    </p>
+    <p>
+      With the <em>arithmetic right shift</em> we write <code>&minus;8 &gt;&gt; 1</code>:
+      the top is filled with 1 (the sign bit), giving <code>11111100</code>, which is &minus;4, and correct.
+    </p>
+    <p>
+      Sign-bit replication is the only fill value that preserves the two&rsquo;s complement interpretation of division by 2<sup>n</sup>.
+      It is not a special rule that was added for convenience.
+      For positive values (sign bit = 0), both variants agree. The distinction only matters for negative values.
+    </p>
+
+    <h3>Interactive Right Shift Demo</h3>
+
+    <p>
+      In the demo below, we can visualize how logical and arithmetic right shifts operate.
+      Two things to remember:
+    </p>
+    <ul>
+      <li>The <strong>Logical</strong> operator tab treats the 8-bit pattern as a raw unsigned integer, so no sign bit.
+      The range is 0&ndash;255. The fill is always 0, so the result is always non-negative.</li>
+      <li>The <strong>Arithmetic</strong> operator tab treats the bit pattern as a signed two's complement integer.
+      The range is &minus;128 to 127. The fill replicates the sign bit, so the result preserves the sign of the input.</li>
+    </ul>
+
+
+    <!-- ── Demo 4.2 ── -->
+    <div class="demo-box">
+      <div class="demo-title">Demo 4.2 &mdash; Right Shift</div>
+
+      <div class="tab-row">
+        <button class="tab ch4r-tab active" data-mode="lsr" onclick="ch4RSetMode('lsr')"><code>&gt;&gt;&gt;</code>&nbsp; Logical</button>
+        <button class="tab ch4r-tab"        data-mode="asr" onclick="ch4RSetMode('asr')"><code>&gt;&gt;</code>&nbsp; Arithmetic</button>
+      </div>
+
+      <div class="preset-row" id="ch4r-preset-row-lsr">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch4RPreset('div2')">&#247;2</button>
+        <button class="preset-btn" onclick="ch4RPreset('div4')">&#247;4</button>
+        <button class="preset-btn" onclick="ch4RPreset('extractupper')">extract upper bits</button>
+      </div>
+      <div class="preset-row" id="ch4r-preset-row-asr" style="display:none">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-btn" onclick="ch4RPreset('signeddiv2')">signed &#247;2</button>
+        <button class="preset-btn" onclick="ch4RPreset('allones')">all ones (&minus;1)</button>
+        <button class="preset-btn" onclick="ch4RPreset('positive')">positive</button>
+        <button class="preset-btn" onclick="ch4RPreset('min')">min (&minus;128)</button>
+      </div>
+
+      <div class="formula-bar" id="ch4r-formula"></div>
+
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-size:13px">A:
+          <input type="number" id="ch4r-a-num" min="0" max="255" style="width:60px;margin-left:4px"
+                 oninput="ch4RSetVal(+this.value)">
+        </label>
+        <label style="font-size:13px">shift n:
+          <input type="number" id="ch4r-shift-num" min="0" max="7" style="width:50px;margin-left:4px"
+                 oninput="ch4RSetShift(+this.value)">
+        </label>
+        <input type="range" id="ch4r-shift-slider" min="0" max="7" style="width:120px"
+               oninput="ch4RSliderInput(+this.value)">
+      </div>
+
+      <div class="op-grid">
+        <div class="op-row">
+          <span class="op-label">A</span>
+          <div class="bit-row" id="ch4r-a-row"></div>
+          <span class="op-value" id="ch4r-a-val"></span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-row">
+          <span class="op-label" id="ch4r-result-label">A &gt;&gt;&gt; n</span>
+          <div class="bit-row" id="ch4r-result-row"></div>
+          <span class="op-value" id="ch4r-result-val-label"></span>
+        </div>
+      </div>
+
+      <div class="bit-index-row" id="ch4r-index-row" style="margin-left:60px"></div>
+
+      <div class="result-box">
+        <span class="result-value" id="ch4r-result-value"></span>
+        <span class="result-label">decimal</span>
+        <div class="result-explain" id="ch4r-result-explain"></div>
+      </div>
+    </div>
+
+    <details class="collapsible">
+      <summary>Notes on the presets</summary>
+      <div class="collapsible-body">
+        <p><strong>Logical Right Shift Presets</strong></p>
+        <p>
+          The <em>&#247;2</em> and <em>&#247;4</em> logical-shift presets illustrate straightforward
+          integer division. The values are chosen so no sign bit is involved.
+          Try swapping between the logical and arithmetic shift tabs with these presets.
+          These are clean cases where both shifts agree.
+        </p>
+        <p>
+          The <em>extract upper bits</em> preset (0b11110000&nbsp;&gt;&gt;&gt;&nbsp;4) moves the
+          four upper bits down to positions 0&ndash;3 and fills the top with zeros. This is a common
+          technique for reading a packed field from the upper portion of a byte, which we will cover later in this tutorial.
+        </p>
+        <p><strong>Arithmetic Right Shift Presets</strong></p>
+        <p>
+          The <em>signed &divide;2</em> preset (A&nbsp;=&nbsp;&minus;64, n&nbsp;=&nbsp;1) shows
+          arithmetic right shift performing correct signed division: &minus;64 &divide; 2 = &minus;32.
+          The sign bit is 1, so the vacated top position is filled with 1, keeping the result negative.
+          Compare this with the logical tab on the same bit pattern (which reads as 192 unsigned)
+          to see how the fill choice determines whether the result is meaningful as signed division.
+        </p>
+        <p>
+          The <em>all ones (&minus;1)</em> arithmetic-shift preset (A&nbsp;=&minus;1, n&nbsp;=&nbsp;3)
+          demonstrates that shifting &minus;1 right by any amount always returns &minus;1. Every
+          vacated position is filled with the sign bit (1), so the all-ones pattern is preserved.
+          This is aligned with the floor-division interpretation of arithmetic right shift.
+          We can divide a negative integer by increasingly large powers of 2, but we always round down
+          to &minus;1.
+        </p>
+        <p>
+          The <em>positive</em> preset (A&nbsp;=&nbsp;64, n&nbsp;=&nbsp;2) confirms that when the
+          sign bit is 0, both shifts produce the same result. Switch between tabs to verify.
+        </p>
+        <p>
+          The <em>min (&minus;128)</em> preset shows the most-negative 8-bit value halved to &minus;64.
+          The sign fill is clearly visible: the vacated top bit is filled with red, matching the
+          original sign bit.
+        </p>
+      </div>
+    </details>
+
+    <h2>Bit Shifts in Python</h2>
+
+    <p>
+      Python&rsquo;s native <code>int</code> type has no fixed bit width. Unlike C or JavaScript,
+      where integers live in 32- or 64-bit containers, Python&rsquo;s <code>int</code> grows to
+      however many bits it needs. Positive numbers conceptually have an infinite stream of 0s to
+      the left; negative numbers have an infinite stream of 1s. This single property leads to two
+      notable differences in how shift operators behave:
+    </p>
+    <ul>
+      <li><strong>Left shifts never overflow.</strong> There is always room to grow to the left,
+        so no bits are ever discarded. When we apply a left shift in Python, multiplying by powers of 2,
+        the integer keeps growing.</li>
+      <li><strong>Arithmetic right shift only.</strong> Without a defined top boundary, zero-fill
+        has no meaning. So there is no <code>&gt;&gt;&gt;</code> operator in Python. We can still simulate
+        a logical right shift by setting an explicit mask to declare the width of the bit sequence.</li>
+    </ul>
+    <p>
+      Note that this applies to Python&rsquo;s native <code>int</code> only. Libraries that define
+      fixed-width integer types; such as NumPy (<code>numpy.int8</code>, <code>numpy.uint32</code>)
+      and PyTorch (<code>torch.int8</code>, <code>torch.int32</code>); follow fixed-width
+      rules instead. With those types, left shifts can overflow and right shift behavior depends
+      on the type&rsquo;s signedness, just as in C or JavaScript.
+    </p>
+
+    <details class="collapsible">
+      <summary>A deeper look at Python&rsquo;s native <code>int</code> behavior</summary>
+      <div class="collapsible-body">
+
+        <p><strong>Unbounded bit representation</strong></p>
+        <p>
+          In Python, every integer is conceptually represented with infinite leading bits matching
+          its sign:
+        </p>
+        <pre><code> 1  →  ...0000 0000 0000 0001
+-1  →  ...1111 1111 1111 1111
+-64 →  ...1111 1111 1100 0000</code></pre>
+        <p>
+          This is the same two&rsquo;s complement representation from Chapter 2, extended infinitely
+          to the left rather than capped at a fixed width.
+        </p>
+
+        <p><strong>Left shifts never overflow</strong></p>
+        <p>
+          Because the sequence can always grow, <code>1 &lt;&lt; 100</code> simply produces a very
+          large integer rather than wrapping around. There is no left edge for bits to fall off.
+          In C, shifting a 32-bit integer by 100 is undefined behavior and most implementations
+          return 0 or a garbage value. In JavaScript, the shift amount is masked to 5 bits
+          (mod&nbsp;32), so <code>1 &lt;&lt; 100</code> evaluates as <code>1 &lt;&lt; 4 = 16</code>
+          &mdash; surprising, but not a discard.
+        </p>
+
+        <p><strong>Simulating logical right shifts</strong></p>
+        <p>
+          Because Python&rsquo;s <code>&gt;&gt;</code> is always arithmetic, negative values fill
+          with 1s on the left. To force zero-fill, mask the value first to strip away the infinite
+          sign extension, leaving only the bits you care about. For an 8-bit logical right shift:
+        </p>
+        <pre><code>x = -64           # ...1111 1111 1100 0000 in Python's unbounded representation
+x &amp; 0xFF          # → 192  (keeps only the low 8 bits: 1100 0000)
+(x &amp; 0xFF) &gt;&gt; 1  # → 96   (zero-fill, treating it as unsigned)</code></pre>
+        <p>
+          The mask <code>0xFF</code> (<code>11111111</code>) cuts off all the infinite 1s to the
+          left, leaving just the 8-bit pattern. After masking, shifting right always fills with 0
+          because the sign bit of the masked value is 0.
+          Without the mask, <code>-64 &gt;&gt; 1</code> gives <code>-32</code>
+          (arithmetic); with it, <code>(-64 &amp; 0xFF) &gt;&gt; 1</code> gives <code>96</code> (logical).
+          The width of the mask determines the width of the logical shift: <code>0xFF</code>
+          for 8 bits, <code>0xFFFF</code> for 16, <code>0xFFFFFFFF</code> for 32.
+        </p>
+
+      </div>
+    </details>
+
+    <h2>Conclusion</h2>
+
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin:1rem 0">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:6px 8px">Operator</th>
+          <th style="text-align:left;padding:6px 8px">Symbol</th>
+          <th style="text-align:left;padding:6px 8px">Vacated bits filled with</th>
+          <th style="text-align:left;padding:6px 8px">Arithmetic meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:0.5px solid var(--border)">
+          <td style="padding:6px 8px">Left shift</td>
+          <td style="padding:6px 8px"><code>&lt;&lt;</code></td>
+          <td style="padding:6px 8px">0 (right side)</td>
+          <td style="padding:6px 8px">&times; 2<sup>n</sup> (may overflow in fixed-width languages)</td>
+        </tr>
+        <tr style="border-bottom:0.5px solid var(--border)">
+          <td style="padding:6px 8px">Logical right shift</td>
+          <td style="padding:6px 8px"><code>&gt;&gt;&gt;</code></td>
+          <td style="padding:6px 8px">0 (left side)</td>
+          <td style="padding:6px 8px">&divide; 2<sup>n</sup>, unsigned</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 8px">Arithmetic right shift</td>
+          <td style="padding:6px 8px"><code>&gt;&gt;</code></td>
+          <td style="padding:6px 8px">copy of sign bit (left side)</td>
+          <td style="padding:6px 8px">&divide; 2<sup>n</sup>, signed (rounds toward &minus;&infin;)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      In Chapter 5 we will use shifts to build masks. The expression <code>1 &lt;&lt; k</code>
+      is the fundamental building block: a single left shift produces a bit pattern that
+      targets any position we choose.
+    </p>
+
+  </div>
+
+  <nav class="navbar" style="margin-top:2rem;margin-bottom:0">
+    <a class="navbar-brand" href="../index.html">Bit Manipulation</a>
+    <div class="navbar-nav">
+      <a href="03-operators.html">&larr; Bitwise Operators</a>
+      <a href="05-masks.html">Masks &rarr;</a>
+    </div>
+  </nav>
+
+  <script src="../js/bits.js"></script>
+  <script src="../js/demos/ch04-shifts.js"></script>
+  <script>
+    const MOON = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    const SUN  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function isDark() {
+      const t = document.documentElement.dataset.theme;
+      if (t === 'dark') return true;
+      if (t === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function updateIcon() {
+      document.getElementById('theme-icon').innerHTML = isDark() ? MOON : SUN;
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      updateIcon();
+    });
+
+    updateIcon();
+  </script>
+
+</body>
+</html>
