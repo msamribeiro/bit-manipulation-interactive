@@ -39,7 +39,7 @@ basic programming but no prior knowledge of binary arithmetic or hardware.
 - **Interactive at every step.** Each concept has a hands-on demo. Passive reading
   is minimised.
 - **Coherent progression.** The chapters follow a deliberate learning arc: place
-  values → signed integers → operators → shifts → masks → bit tasks → packing →
+  values → signed integers → operators → shifts → bit masks → bit tasks → packing →
   applications → floating point.
 - **Unified design.** All demos share one stylesheet and one set of utility
   functions. They feel like one product, not separate widgets.
@@ -71,7 +71,7 @@ bit-manipulation/
 │       ├── ch02-signed.js
 │       ├── ch03-operators.js
 │       ├── ch04-shifts.js
-│       ├── ch05-masks.js
+│       ├── ch05-bit-masks.js
 │       ├── ch06-bit-tasks.js
 │       ├── ch07-packing.js
 │       ├── ch08-applications.js
@@ -82,7 +82,7 @@ bit-manipulation/
 │   ├── 02-signed-integers.html
 │   ├── 03-operators.html
 │   ├── 04-shifts.html
-│   ├── 05-masks.html
+│   ├── 05-bit-masks.html
 │   ├── 06-bit-tasks.html
 │   ├── 07-packing-unpacking.html
 │   ├── 08-applications.html
@@ -729,10 +729,10 @@ arithmetic right shift `>>` (signed).
 
 ---
 
-### Chapter 5 — Masks
+### Chapter 5 — Bit Masks
 
-**File:** `chapters/05-masks.html`
-**JS:**   `js/demos/ch05-masks.js`
+**File:** `chapters/05-bit-masks.html`
+**JS:**   `js/demos/ch05-bit-masks.js`
 
 **Prose topics:**
 - `1 << k` as the universal mask seed
@@ -942,10 +942,10 @@ Phases are sequential. Each produces a testable, committable unit of work.
 
 ---
 
-### Phase 6 — Chapter 5: Masks
+### Phase 6 — Chapter 5: Bit Masks
 
-1. Write `chapters/05-masks.html`.
-2. Implement Demo 5.1 (2-tab mask builder) in `js/demos/ch05-masks.js`.
+1. Write `chapters/05-bit-masks.html`.
+2. Implement Demo 5.1 (2-tab mask builder) in `js/demos/ch05-bit-masks.js`.
 3. Test range mask edge cases: lo=hi, lo=0, hi=7.
 
 ---
@@ -1018,7 +1018,7 @@ Phases are sequential. Each produces a testable, committable unit of work.
 | 6  | XOR visualizer                | 3       | Two inputs        | See which bits are toggled         |
 | 7  | NOT visualizer                | 3       | Single input      | See all bits flip                  |
 | 8  | Shift visualizer              | 4       | Input + 3 modes   | See bits move, drop, fill          |
-| 9  | Mask builder                  | 5       | 2-tab             | Build single-bit and range masks   |
+| 9  | Bit mask builder              | 5       | 2-tab             | Build single-bit and range masks   |
 | 10 | Bit operations explorer       | 6       | 5-tab, input + k  | Get/set/clear/toggle/update        |
 | 11 | RGB packer / unpacker         | 7       | 3-tab             | Pack and unpack fields             |
 | 12 | Permission system             | 8       | Toggle switches   | Flags in a realistic context       |
