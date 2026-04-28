@@ -142,6 +142,16 @@ body {
   color: var(--text-primary);
   margin-bottom: 1rem;
 }
+.prose ul, .prose ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+.prose li {
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+}
 .prose code {
   font-family: monospace;
   font-size: 0.88em;
