@@ -1063,3 +1063,7 @@ Phases are sequential. Each produces a testable, committable unit of work.
 - **The clock rebuilds fully on every select.** Do not refactor this to targeted
   attribute updates unless profiling reveals a real performance problem (it won't
   at 16 nodes). The simplicity of full rebuild is intentional.
+
+- **Commit `CLAUDE.md` in isolation.** Design doc changes must be committed
+  separately from code changes, so the version history of the spec is readable
+  on its own. Never bundle a `CLAUDE.md` edit into a chapter or CSS commit.
