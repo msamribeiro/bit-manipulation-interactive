@@ -10,9 +10,9 @@
 > - `js/bits.js` utility API is now concretely specified, derived from the actual
 >   functions used across all built demos.
 > - Clock demo implementation notes added with full architectural detail.
-> - Demo count updated from 14 to 16 (clock + format comparison both added).
-> - Chapter order updated: Bit Puzzles inserted as Ch7; old Ch7–9 shifted to Ch8–10;
->   "Applications" renamed "Bit Patterns" to avoid clash with section label.
+> - Bit Puzzles inserted as Ch7; old Ch7–9 shifted to Ch8–10; "Applications"
+>   renamed "Bit Patterns" to avoid clash with section label.
+> - Demo count updated to 20 (clock, format comparison, and four Bit Puzzle steppers added).
 
 ---
 
